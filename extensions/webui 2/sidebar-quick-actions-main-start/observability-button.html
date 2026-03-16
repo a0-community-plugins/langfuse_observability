@@ -1,0 +1,49 @@
+<html>
+<head>
+  <script type="module">
+    import { store as traceStore } from "/usr/plugins/a0_community_plugins__langfuse_observability/webui/trace-viewer-store.js";
+    import { setup as setupMessageTrace } from "/usr/plugins/a0_community_plugins__langfuse_observability/webui/message-trace-injector.js";
+
+    // Inject trace buttons into message action areas once DOM is ready
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupMessageTrace);
+    } else {
+      setupMessageTrace();
+    }
+  </script>
+  <style>
+    /* Trace button injected into message action areas */
+    .lf-trace-action {
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.15s ease;
+    }
+
+    .lf-trace-action:hover {
+      opacity: 1;
+    }
+
+    .lf-trace-action .material-symbols-outlined {
+      color: var(--color-accent, #89b4fa);
+    }
+  </style>
+</head>
+
+<body>
+  <div x-data="{
+    openTraceViewer() {
+      const contextId = $store.chats?.selected || '';
+      if (contextId) {
+        $store.traceViewer.loadLatestTrace(contextId);
+      }
+      openModal('/usr/plugins/a0_community_plugins__langfuse_observability/webui/trace-viewer.html');
+    }
+  }">
+    <template x-if="$store.traceViewer">
+      <button class="config-button" @click="openTraceViewer()" title="Trace Viewer">
+        <span class="material-symbols-outlined">monitoring</span>
+      </button>
+    </template>
+  </div>
+</body>
+</html>
