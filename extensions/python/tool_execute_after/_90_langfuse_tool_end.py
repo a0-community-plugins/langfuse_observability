@@ -1,5 +1,5 @@
-from extensions import Extension
-from tools import Response
+from helpers.extension import Extension
+from helpers.tool import Response
 
 
 class LangfuseToolSpanEnd(Extension):

@@ -1,4 +1,4 @@
-from extensions import Extension
+from helpers.extension import Extension
 from agent import LoopData
 
 

@@ -5,7 +5,7 @@ _PLUGIN_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(o
 if _PLUGIN_ROOT not in sys.path:
     sys.path.append(_PLUGIN_ROOT)
 
-from extensions import Extension
+from helpers.extension import Extension
 from langfuse_helpers.langfuse_helper import get_langfuse_client, should_sample
 from langfuse import LangfuseOtelSpanAttributes
 from agents import Agent, LoopData

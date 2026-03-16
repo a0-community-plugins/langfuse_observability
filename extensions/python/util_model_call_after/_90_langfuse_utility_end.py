@@ -1,5 +1,5 @@
-from extensions import Extension
-from extensions.python import approximate_tokens
+from helpers.extension import Extension
+from helpers.tokens import approximate_tokens
 
 
 class LangfuseUtilityGenerationEnd(Extension):
