@@ -33,6 +33,47 @@ def _ensure_langfuse_installed():
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to install langfuse: {e}")
 
+    # Always attempt model compat patch after install check
+    _patch_langfuse_models()
+
+
+def _patch_langfuse_models() -> None:
+    """Make 'organization' and 'metadata' Optional in the langfuse Project model.
+
+    langfuse SDK >= 3.14 added required fields (organization, metadata) that
+    older self-hosted servers do not return. Patching the Pydantic model to
+    default them to None keeps auth_check() working without downgrading the SDK.
+    Safe to call multiple times; does nothing if already patched or on failure.
+    """
+    try:
+        import typing
+        from pydantic_core import PydanticUndefined
+        from langfuse.api.projects.types.project import Project
+
+        needs_rebuild = False
+        for field_name in ("organization", "metadata"):
+            if field_name not in Project.model_fields:
+                continue
+            fi = Project.model_fields[field_name]
+            if fi.default is PydanticUndefined:
+                fi.default = None
+                needs_rebuild = True
+                # Widen annotation to Optional so Pydantic rebuilds correctly
+                if field_name in Project.__annotations__:
+                    orig = Project.__annotations__[field_name]
+                    Project.__annotations__[field_name] = typing.Optional[orig]
+
+        if needs_rebuild:
+            Project.model_rebuild(force=True)
+            logger.info(
+                "Patched langfuse Project model: 'organization' and 'metadata' "
+                "are now Optional for compatibility with older self-hosted servers."
+            )
+    except ImportError:
+        pass  # langfuse not installed yet — will be called again after install
+    except Exception as e:
+        logger.warning(f"Could not patch langfuse Project model: {e}")
+
 
 def get_langfuse_config() -> dict[str, Any]:
     """Get Langfuse configuration with plugin config > env var > default precedence."""
